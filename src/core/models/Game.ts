@@ -7,6 +7,7 @@ export type GameStatus = "in_progress" | "win" | "draw";
 export class Game {
   private moves: Move[] = [];
   public status: GameStatus = "in_progress";
+  public id: String = "";
 
   constructor(
     public readonly board: Board,

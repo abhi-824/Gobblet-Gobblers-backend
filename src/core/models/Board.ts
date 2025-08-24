@@ -29,8 +29,35 @@ export class Board {
   }
 
   checkWin(player: Player): boolean {
-    // placeholder for win-check logic
-    
+    const ownsCell = (row: number, col: number): boolean => {
+      const topPiece = this.getCell(row, col).top();
+      return topPiece?.owner === player;
+    };
+
+    // Check rows
+    for (let r = 0; r < this.size; r++) {
+      if (Array.from({ length: this.size }, (_, c) => ownsCell(r, c)).every(Boolean)) {
+        return true;
+      }
+    }
+
+    // Check columns
+    for (let c = 0; c < this.size; c++) {
+      if (Array.from({ length: this.size }, (_, r) => ownsCell(r, c)).every(Boolean)) {
+        return true;
+      }
+    }
+
+    // Check main diagonal
+    if (Array.from({ length: this.size }, (_, i) => ownsCell(i, i)).every(Boolean)) {
+      return true;
+    }
+
+    // Check anti-diagonal
+    if (Array.from({ length: this.size }, (_, i) => ownsCell(i, this.size - 1 - i)).every(Boolean)) {
+      return true;
+    }
+
     return false;
   }
 }

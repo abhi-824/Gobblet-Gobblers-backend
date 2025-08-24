@@ -5,6 +5,7 @@ export class Player {
   constructor(
     public readonly id: string,
     public readonly type: "human" | "computer",
+    public readonly name?: string,
     private pieces: GamePiece[] = []
   ) {}
 
