@@ -10,7 +10,7 @@ export function toPublicGameDTO(gameId: string, game: Game) {
       id: p.id,
       type: p.type,
       pieces: p.getAvailablePieces().map((gp) => ({
-        id: idOf(gp),
+        id: gp.id,
         size: PieceSize[gp.size],
       })),
     })),
@@ -20,7 +20,8 @@ export function toPublicGameDTO(gameId: string, game: Game) {
         if (!top) return null;
         return {
           ownerId: top.owner.id,
-          size: PieceSize[top.size],
+          pieceId: cell.top()?.id,
+          size: PieceSize[top.size]
         };
       })
     ),

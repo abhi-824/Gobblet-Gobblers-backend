@@ -88,8 +88,11 @@ export class GameService {
     if (!piece) throw new Error("Piece not found");
     if (piece.owner.id !== playerId) throw new Error("Not your piece");
 
-    const move = new Move(player, null, to, piece);
+    const from = game.board.findPiecePosition(piece);
+
+    const move = new Move(player, from, to, piece);
     const ok = game.makeMove(move);
+    
     if (!ok) throw new Error("Invalid move");
 
     await this.moves.append(gameId, move);

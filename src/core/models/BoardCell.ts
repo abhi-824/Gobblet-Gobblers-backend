@@ -25,4 +25,8 @@ export class BoardCell {
   getStack(): GamePiece[] {
     return [...this.stack];
   }
+
+  contains(piece: GamePiece): boolean {
+    return this.stack.some(p => p.id === piece.id);
+  }
 }
