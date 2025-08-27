@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Game {
+  id         String    @id @default(uuid())
+  mode       String
+  difficulty String?
+  createdAt  DateTime  @default(now())
+  startedAt  DateTime?
+  status     String    @default("in_progress")
+
+  players    Player[]
+  moves      Move[]
+  board      Board?
+
+  pieces     Piece[]   // 👈 added so Piece.game has an opposite
+}
+
+model Player {
+  id       String   @id @default(uuid())
+  type     String
+  name     String?
+  gameId   String
+  game     Game     @relation(fields: [gameId], references: [id])
+
+  pieces   Piece[]
+  moves    Move[]   // 👈 added so Move.player has an opposite
+}
+
+model Piece {
+  id       String   @id @default(uuid())
+  size     Int
+  ownerId  String
+  owner    Player   @relation(fields: [ownerId], references: [id])
+  gameId   String
+  game     Game     @relation(fields: [gameId], references: [id])
+
+  moves    Move[]   // 👈 added so Move.piece has an opposite
+}
+
+model Board {
+  id      String @id @default(uuid())
+  gameId  String @unique
+  game    Game   @relation(fields: [gameId], references: [id])
+  state   Json
+}
+
+model Move {
+  id       String   @id @default(uuid())
+  playerId String
+  player   Player   @relation(fields: [playerId], references: [id])
+  pieceId  String
+  piece    Piece    @relation(fields: [pieceId], references: [id])
+  gameId   String
+  game     Game     @relation(fields: [gameId], references: [id])
+
+  from     Json?
+  to       Json
+  createdAt DateTime @default(now())
+}
