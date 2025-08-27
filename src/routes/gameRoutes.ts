@@ -1,14 +1,18 @@
 import { Router } from "express";
-import { InMemoryBoardRepository, InMemoryMoveRepository, InMemoryGameRepository, InMemoryPieceRepository, InMemoryPlayerRepository } from "../storage/inmemory";
+import { PrismaGameRepository } from "../storage/PrismaGameRepository";
+import { PrismaPlayerRepository } from "../storage/PrismaPlayerRepository";
+import { PrismaPieceRepository } from "../storage/PrismaPieceRepository";
+import { PrismaBoardRepository } from "../storage/PrismaBoardRepository";
+import { PrismaMoveRepository } from "../storage/PrismaMoveRepository";
 import { BotStrategyFactory } from "../core/bot/BotStartegyFactory";
 import { GameService } from "../services/GameService";
 import { GameController } from "../controllers/GameController";
 
-const gameRepo = new InMemoryGameRepository();
-const playerRepo = new InMemoryPlayerRepository();
-const pieceRepo = new InMemoryPieceRepository();
-const boardRepo = new InMemoryBoardRepository();
-const moveRepo = new InMemoryMoveRepository();
+const gameRepo = new PrismaGameRepository();
+const playerRepo = new PrismaPlayerRepository();
+const pieceRepo = new PrismaPieceRepository();
+const boardRepo = new PrismaBoardRepository();
+const moveRepo = new PrismaMoveRepository();
 const botFactory = BotStrategyFactory;
 
 const service = new GameService(
