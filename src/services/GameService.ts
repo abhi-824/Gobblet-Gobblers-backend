@@ -40,10 +40,6 @@ export class GameService {
 
     const game = new Game(board, [p1, p2], p1);
     await this.games.saveGame(id, game, { mode, difficulty, createdAt: Date.now() });
-    await this.players.savePlayer(p1);
-    await this.players.savePlayer(p2);
-    await this.boards.saveBoard(id, board);
-    await this.pieces.saveInitialPieces(id, [p1, p2]);
 
     return toPublicGameDTO(id, game);
   }
@@ -77,14 +73,17 @@ export class GameService {
     pieceId: string,
     to: [number, number]
   ) {
-    const { game } = await this.games.getGameById(gameId);
+    const { game, meta } = await this.games.getGameById(gameId);
     if (!game) throw new Error("Game not found");
 
     // Resolve player & piece from in-memory piece store
-    const player = await this.players.getPlayerById(playerId);
+    const player = game.players.find(p => p.id === playerId);
     if (!player) throw new Error("Player not found");
 
-    const piece = await this.pieces.getPieceById(pieceId);
+    const piece = game.players
+    .flatMap(p => p.getAvailablePieces())
+    .find(p => p.id === pieceId);
+
     if (!piece) throw new Error("Piece not found");
     if (piece.owner.id !== playerId) throw new Error("Not your piece");
 
@@ -102,7 +101,6 @@ export class GameService {
     // If next is bot (PVC), auto-move bot
     const next = game.currentPlayer;
     if (next.type === "computer") {
-      const { meta } = await this.games.getGameById(gameId);
       const strat = this.botFactory.create(
         (meta?.difficulty as BotDifficulty) ?? BotDifficulty.EASY
       );

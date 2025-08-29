@@ -6,11 +6,12 @@ export class GamePiece {
     public readonly size: PieceSize;
     public readonly owner: Player;
     public id: string = "";
-  
-    constructor(size: PieceSize, owner: Player) {
-      this.id = uuidv4();
-      this.size = size;
-      this.owner = owner;
+    constructor(size: PieceSize, owner: Player);
+    constructor(size: PieceSize, owner: Player, id: string);
+
+    constructor(size: PieceSize, owner: Player, id?: string) {
+        this.id = id ?? uuidv4();
+        this.size = size;
+        this.owner = owner;
     }
-  }
-  
+}

@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { Player } from "../core/models/Player";
 import { IPlayerRepository } from "./ports";
+import { GamePiece } from "../core/models/GamePiece";
 
 const prisma = new PrismaClient();
 
@@ -36,8 +37,7 @@ export class PrismaPlayerRepository implements IPlayerRepository {
     const player = new Player(db.id, db.type as "human" | "computer", db.name ?? undefined);
     // attach pieces
     db.pieces.forEach((p) => {
-      const { GamePiece } = require("../core/models/GamePiece");
-      player.addPiece(new GamePiece(p.size, player));
+      player.addPiece(new GamePiece(p.size, player, p.id));
     });
     return player;
   }
