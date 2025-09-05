@@ -6,6 +6,11 @@ export function toPublicGameDTO(gameId: string, game: Game) {
     gameId,
     status: game.status,
     currentPlayer: game.currentPlayer.id,
+    winner: game.winner ? {
+      id: game.winner.id,
+      type: game.winner.type,
+      name: game.winner.name
+    } : null,
     players: game.players.map((p) => ({
       id: p.id,
       type: p.type,

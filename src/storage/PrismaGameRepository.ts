@@ -66,8 +66,8 @@ export class PrismaGameRepository implements IGameRepository {
         // Reconstruct pieces with correct IDs
         dbGame.players.forEach((p, i) => {
             p.pieces.forEach((piece) => {
-                const gp = new GamePiece(piece.size, players[i]);
-                gp.id = piece.id; // ✅ preserve DB identity
+                // Preserve DB identity by passing id into constructor
+                const gp = new GamePiece(piece.size as any, players[i], piece.id);
                 players[i].addPiece(gp);
             });
         });
@@ -80,7 +80,8 @@ export class PrismaGameRepository implements IGameRepository {
         // Replay moves to rebuild state
         dbGame.moves.forEach((m) => {
             const pl = players.find((pl) => pl.id === m.playerId)!;
-            const pc = pl.getAvailablePieces().find((p) => p.id === m.pieceId)!;
+            // If piece is not in reserves (already placed), reconstruct by id for move replay
+            const pc = pl.getAvailablePieces().find((p) => p.id === m.pieceId) ?? new GamePiece(m.piece.size as any, pl, m.pieceId);
             if (pc) {
                 const move = new Move(
                     pl,

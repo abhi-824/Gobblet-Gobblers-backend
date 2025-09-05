@@ -29,7 +29,8 @@ export class PrismaMoveRepository implements IMoveRepository {
 
     return moves.map((m) => {
       const pl = new Player(m.player.id, m.player.type as "human" | "computer", m.player.name ?? undefined);
-      const gp = new GamePiece(m.piece.size, pl);
+      // Preserve piece id used in the move
+      const gp = new GamePiece(m.piece.size as any, pl, m.piece.id);
       return new Move(pl, (m.from as [number, number]) ?? null, m.to as [number, number], gp);
     });
   }

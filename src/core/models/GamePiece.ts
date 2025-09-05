@@ -10,8 +10,11 @@ export class GamePiece {
     constructor(size: PieceSize, owner: Player, id: string);
 
     constructor(size: PieceSize, owner: Player, id?: string) {
-        this.id = id ?? uuidv4();
+        this.id = id ? id: uuidv4();
         this.size = size;
         this.owner = owner;
     }
+    clone(newOwner: Player): GamePiece {
+        return new GamePiece(this.size, newOwner, this.id);
+    }    
 }

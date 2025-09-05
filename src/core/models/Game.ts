@@ -2,12 +2,13 @@ import { Board } from "./Board";
 import { Player } from "./Player";
 import { Move } from "./Move";
 
-export type GameStatus = "in_progress" | "win" | "draw";
+export type GameStatus = "in_progress" | "win" | "draw" | "lose";
 
 export class Game {
   private moves: Move[] = [];
   public status: GameStatus = "in_progress";
   public id: String = "";
+  public winner: Player | null = null;
 
   constructor(
     public readonly board: Board,
@@ -29,7 +30,8 @@ export class Game {
 
     if (this.board.checkWin(this.currentPlayer)) {
       this.status = "win";
-    } else if (this.moves.length >= 9) {
+      this.winner = this.currentPlayer;
+    }else if (this.moves.length >= 9) {
       this.status = "draw";
     } else {
       this.currentPlayer = this.getOpponent();
@@ -37,4 +39,26 @@ export class Game {
 
     return true;
   }
+  clone(): Game {
+    // Clone players first (assumes Player has a .clone())
+    const clonedPlayers = this.players.map(p => p.clone()) as [Player, Player];
+
+    // Clone board, remapping references to cloned players
+    const clonedBoard = this.board.clone(clonedPlayers);
+
+    // Get the cloned current player
+    const clonedCurrent = clonedPlayers.find(p => p.id === this.currentPlayer.id)!;
+
+    // Create new game
+    const cloned = new Game(clonedBoard, clonedPlayers, clonedCurrent);
+    cloned.id = this.id;
+    cloned.status = this.status;
+    cloned.winner = this.winner ? clonedPlayers.find(p => p.id === this.winner!.id) || null : null;
+
+    // Clone moves with proper references
+    cloned.moves = this.moves.map(m => m.clone(clonedPlayers));
+
+    return cloned;
+  }
+
 }

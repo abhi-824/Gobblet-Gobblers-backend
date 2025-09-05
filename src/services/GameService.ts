@@ -40,7 +40,7 @@ export class GameService {
 
     const game = new Game(board, [p1, p2], p1);
     await this.games.saveGame(id, game, { mode, difficulty, createdAt: Date.now() });
-
+    console.log(`[GameService:createGame] id=${id} mode=${mode} difficulty=${difficulty}`);
     return toPublicGameDTO(id, game);
   }
 
@@ -51,6 +51,7 @@ export class GameService {
     const second = game.players[1];
     if (second.type !== "human") throw new Error("Game is not PvP");
     await this.players.updatePlayer({ id: second.id, name: playerName });
+    console.log(`[GameService:joinGame] gameId=${gameId} playerName=${playerName}`);
     return toPublicGameDTO(gameId, game);
   }
 
@@ -58,12 +59,14 @@ export class GameService {
     const { game, meta } = await this.games.getGameById(gameId);
     if (!game || !meta) throw new Error("Game not found");
     await this.games.updateGame(gameId, game, { ...meta, startedAt: Date.now() });
+    console.log(`[GameService:startGame] gameId=${gameId}`);
     return toPublicGameDTO(gameId, game);
   }
 
   async getGameState(gameId: string) {
     const { game } = await this.games.getGameById(gameId);
     if (!game) throw new Error("Game not found");
+    console.log(`[GameService:getGameState] gameId=${gameId}`);
     return toPublicGameDTO(gameId, game);
   }
 
@@ -80,19 +83,41 @@ export class GameService {
     const player = game.players.find(p => p.id === playerId);
     if (!player) throw new Error("Player not found");
 
-    const piece = game.players
+    // Try resolve from player's reserve first
+    let piece = game.players
     .flatMap(p => p.getAvailablePieces())
     .find(p => p.id === pieceId);
 
-    if (!piece) throw new Error("Piece not found");
-    if (piece.owner.id !== playerId) throw new Error("Not your piece");
+    // If not in reserves, try resolve from board stacks
+    if (!piece) {
+      const onBoard = game.board.findPieceById(pieceId);
+      if (onBoard) {
+        piece = onBoard;
+      }
+    }
+
+    if (!piece) {
+      const err = new Error("Piece not found");
+      (err as any).statusCode = 404;
+      throw err;
+    }
+
+    if (piece.owner.id != playerId) {
+      const err = new Error("Not your piece");
+      (err as any).statusCode = 403;
+      throw err;
+    }
 
     const from = game.board.findPiecePosition(piece);
 
     const move = new Move(player, from, to, piece);
+    console.log(`[GameService:makeMove] gameId=${gameId} playerId=${playerId} pieceId=${pieceId} from=${from ?? null} to=${to}`);
     const ok = game.makeMove(move);
-    
-    if (!ok) throw new Error("Invalid move");
+    if (!ok) {
+      const err = new Error("Invalid move");
+      (err as any).statusCode = 400;
+      throw err;
+    }
 
     await this.moves.append(gameId, move);
     await this.boards.updateBoard(gameId, game.board);
@@ -105,11 +130,14 @@ export class GameService {
         (meta?.difficulty as BotDifficulty) ?? BotDifficulty.EASY
       );
       const botMove = strat.decideMove(game, next);
+      console.log(`[GameService:botMove] gameId=${gameId} playerId=${next.id} to=${botMove.to}`);
       const ok2 = game.makeMove(botMove);
       if (ok2) {
         await this.moves.append(gameId, botMove);
         await this.boards.updateBoard(gameId, game.board);
         await this.games.updateGame(gameId, game);
+      } else {
+        console.warn(`[GameService:botMove] invalid bot move`, botMove);
       }
     }
 

@@ -76,4 +76,29 @@ export class Board {
         }
         return null;
     }
+    /**
+     * Find and return the actual GamePiece reference on the board by its id.
+     */
+    findPieceById(pieceId: string): GamePiece | null {
+        for (let r = 0; r < this.size; r++) {
+            for (let c = 0; c < this.size; c++) {
+                const stack = this.getCell(r, c).getStack();
+                const found = stack.find(p => p.id === pieceId);
+                if (found) return found;
+            }
+        }
+        return null;
+    }
+    clone(players: Player[]): Board {
+        const clonedBoard = new Board(this.size);
+      
+        for (let r = 0; r < this.size; r++) {
+          for (let c = 0; c < this.size; c++) {
+            clonedBoard.grid[r][c] = this.grid[r][c].clone(players);
+          }
+        }
+      
+        return clonedBoard;
+      }
+          
 }

@@ -24,4 +24,11 @@ export class Player {
   addPiece(piece: GamePiece) {
     this.pieces.push(piece);
   }
+  clone(): Player {
+    const cloned = new Player(this.id, this.type, this.name);
+    this.pieces.forEach(p => {
+      cloned.addPiece(p.clone(cloned)); // relies on GamePiece.clone()
+    });
+    return cloned;
+  }
 }

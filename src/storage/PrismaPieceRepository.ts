@@ -27,7 +27,8 @@ export class PrismaPieceRepository implements IPieceRepository {
 
     return pieces.map((p) => {
       const owner = new Player(p.owner.id, p.owner.type as "human" | "computer", p.owner.name ?? undefined);
-      return new GamePiece(p.size, owner);
+      // Preserve piece id from DB
+      return new GamePiece(p.size as any, owner, p.id);
     });
   }
 
@@ -35,6 +36,7 @@ export class PrismaPieceRepository implements IPieceRepository {
     const piece = await prisma.piece.findUnique({ where: { id }, include: { owner: true } });
     if (!piece) return null;
     const owner = new Player(piece.owner.id, piece.owner.type as "human" | "computer", piece.owner.name ?? undefined);
-    return new GamePiece(piece.size, owner);
+    // Preserve piece id from DB
+    return new GamePiece(piece.size as any, owner, piece.id);
   }
 }
