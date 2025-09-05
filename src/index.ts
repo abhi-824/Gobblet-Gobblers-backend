@@ -4,7 +4,9 @@ import { gameRouter } from "./routes/gameRoutes";
 
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: "https://gobblet.netlify.app"
+}));
 app.use(express.json());
 
 // Simple request id generator
