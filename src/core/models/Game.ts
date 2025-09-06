@@ -31,9 +31,7 @@ export class Game {
     if (this.board.checkWin(this.currentPlayer)) {
       this.status = "win";
       this.winner = this.currentPlayer;
-    }else if (this.moves.length >= 9) {
-      this.status = "draw";
-    } else {
+    }else {
       this.currentPlayer = this.getOpponent();
     }
 
